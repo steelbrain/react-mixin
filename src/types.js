@@ -1,6 +1,6 @@
 /* @flow */
 
-export type MixinOptions = {
+export type Options = {
   react: boolean,
   decorator: boolean,
 }

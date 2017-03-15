@@ -1,10 +1,10 @@
 /* @flow */
 
 import React from 'react'
-import { invokeFrom } from './helpers'
-import type { MixinOptions } from './types'
+import { fillOptions, invokeFrom } from './helpers'
+import type { Options } from './types'
 
-export function process(options: MixinOptions, source: Function, givenMixins: Array<any>): Function {
+export function process(options: Options, source: Function, givenMixins: Array<any>): Function {
   const mixins = givenMixins.filter(i => i)
   const methodMixins = mixins.filter(i => typeof i === 'object')
 
@@ -74,7 +74,9 @@ export function process(options: MixinOptions, source: Function, givenMixins: Ar
   }, ChildComponent)
 }
 
-export default function mixin(options: MixinOptions, sourceOrMixins: Function | Array<any>, mixins: Array<any> = []): any {
+export default function mixin(givenOptions: Object, sourceOrMixins: Function | Array<any>, mixins: Array<any> = []): any {
+  const options = fillOptions(givenOptions)
+
   if (options.decorator) {
     const mixinsLocal = sourceOrMixins
     if (!Array.isArray(mixinsLocal)) {
