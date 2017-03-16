@@ -4,6 +4,11 @@ import * as Helpers from '../lib/helpers'
 
 describe('Heplers', function() {
   describe('fillOptions', function() {
+    it('throws when options is not an object', function() {
+      expect(function() {
+        Helpers.fillOptions()
+      }).toThrow('Options must be a valid object')
+    })
     it('defaults react to true', function() {
       expect(Helpers.fillOptions({}).react).toBe(true)
       expect(Helpers.fillOptions({ react: null }).react).toBe(false)

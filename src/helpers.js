@@ -11,6 +11,10 @@ export function invokeFrom(mixins: Array<Object>, name: string, thisArg: any, ar
 }
 
 export function fillOptions(given: Object): Options {
+  if (!given || typeof given !== 'object') {
+    throw new Error('Options must be a valid object')
+  }
+
   const options = {}
 
   options.react = typeof given.react === 'undefined' ? true : !!given.react
