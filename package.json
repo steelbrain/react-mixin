@@ -15,8 +15,9 @@
     "babel-cli": "^6.22.2",
     "babel-preset-steelbrain": "^4.0.2",
     "eslint-config-steelbrain": "^2.0.0",
-    "jasmine-react-helpers": "^0.2.2",
+    "eslint-plugin-react": "^6.10.0",
     "react": "^15.0.0",
+    "react-dom": "^15.4.2",
     "rimraf": "^2.6.1"
   },
   "dependencies": {},

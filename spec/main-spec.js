@@ -1,6 +1,7 @@
 /* @flow */
 
 import React from 'react'
+import ReactDOM from 'react-dom'
 import mixin from '../lib'
 
 describe('react-mixin', function() {
@@ -157,6 +158,96 @@ describe('react-mixin', function() {
 
       expect(decor(value1)).toBe(value4)
       expect(called).toEqual(['func1', 'func2', 'func3', 'func4'])
+    })
+    it('calls all lifecycle methods properly', function() {
+      const called = []
+      let myThis
+
+      function validateMyThis(givenThis) {
+        if (!givenThis || !myThis) return
+        if (myThis !== givenThis) throw new Error('Invalid this passed on')
+        myThis = givenThis
+      }
+
+      const decor = mixin({ decorator: true }, [{
+        componentDidMount() {
+          validateMyThis(this)
+          called.push('componentDidMount-custom')
+        },
+        componentWillMount() {
+          validateMyThis(this)
+          called.push('componentWillMount-custom')
+        },
+        componentWillReceiveProps() {
+          validateMyThis(this)
+          called.push('componentWillReceiveProps-custom')
+        },
+        componentWillUpdate() {
+          validateMyThis(this)
+          called.push('componentWillUpdate-custom')
+        },
+        componentDidUpdate() {
+          validateMyThis(this)
+          called.push('componentDidUpdate-custom')
+        },
+        componentWillUnmount() {
+          validateMyThis(this)
+          called.push('componentWillUnmount-custom')
+        },
+        getChildContext() {
+          validateMyThis(this)
+          called.push('getChildContext-custom')
+        },
+      }])
+
+      @decor
+      // $FlowIgnore: IT IS A REACT COMPONENT!!!
+      class MyClass { // eslint-disable-line no-unused-vars
+        componentDidMount() {
+          validateMyThis(this)
+          called.push('componentDidMount')
+        }
+        componentWillMount() {
+          validateMyThis(this)
+          called.push('componentWillMount')
+        }
+        componentWillReceiveProps() {
+          validateMyThis(this)
+          called.push('componentWillReceiveProps')
+        }
+        componentWillUpdate() {
+          validateMyThis(this)
+          called.push('componentWillUpdate')
+        }
+        componentDidUpdate() {
+          validateMyThis(this)
+          called.push('componentDidUpdate')
+        }
+        componentWillUnmount() {
+          validateMyThis(this)
+          called.push('componentWillUnmount')
+        }
+        getChildContext() {
+          validateMyThis(this)
+          called.push('getChildContext')
+        }
+        render() {
+          return <div>Well Damn</div>
+        }
+      }
+
+      const parent = document.createElement('div')
+      ReactDOM.render(<MyClass a="hi" />, parent)
+
+      expect(parent.outerHTML).toBe('<div><div data-reactroot="">Well Damn</div></div>')
+      expect(called).toEqual([
+        'componentWillMount-custom',
+        'componentWillMount',
+        'getChildContext-custom',
+        'getChildContext',
+        'componentDidMount-custom',
+        'componentDidMount',
+      ])
     })
   })
 })

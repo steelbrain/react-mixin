@@ -1,7 +1,7 @@
 /* @flow */
 
 import React from 'react'
-import { fillOptions, invokeFrom } from './helpers'
+import { fillOptions, mergeIntoComponent, invokeFrom } from './helpers'
 import type { Options } from './types'
 
 const BLACKLISTED_KEYS = new Set(['length', 'prototype', 'contextTypes', 'prototype', 'arguments', 'caller'])
@@ -34,16 +34,12 @@ export function process(options: Options, source: Function, givenMixins: Array<a
     componentWillUnmount(...args) {
       invokeFrom(methodMixins, 'componentWillUnmount', this, args)
     }
+    shouldUpdateComponent(...args) {
+      return invokeFrom(methodMixins, 'shouldUpdateComponent', this, args).every(i => i)
+    }
     getChildContext() {
       const result = {}
       invokeFrom(methodMixins, 'getChildContext', this, []).forEach(function(entry) {
-        Object.assign(result, entry)
-      })
-      return result
-    }
-    getDefaultProps() {
-      const result = {}
-      invokeFrom(methodMixins, 'getDefaultProps', this, []).forEach(function(entry) {
         Object.assign(result, entry)
       })
       return result
@@ -60,16 +56,9 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   })
   Object.setPrototypeOf(ChildComponent.prototype, source.prototype)
 
-  // NOTE: Make sure that mixins can be overwritten by the class contextTypes
-  const contextTypes = {}
-  methodMixins.forEach(function(entry) {
-    if (entry.contextTypes && typeof entry.contextTypes === 'object') {
-      Object.assign(contextTypes, entry.contextTypes)
-    }
-  })
-  Object.assign(contextTypes, source.contextTypes)
-  // $FlowIgnore: React class prop
-  ChildComponent.contextTypes = contextTypes
+  mergeIntoComponent('contextTypes', ChildComponent, source, mixins)
+  mergeIntoComponent('childContextTypes', ChildComponent, source, mixins)
+  mergeIntoComponent('defaultProps', ChildComponent, source, mixins)
 
   if (options.react) {
     Object.setPrototypeOf(source.prototype, React.Component.prototype)

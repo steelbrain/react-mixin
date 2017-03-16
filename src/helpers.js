@@ -22,3 +22,15 @@ export function fillOptions(given: Object): Options {
 
   return options
 }
+
+export function mergeIntoComponent(name: string, component: Function, source: Function, mixins: Array<Object>): void {
+  const together = {}
+  mixins.filter(i => typeof i === 'object' && i).forEach(function(entry) {
+    if (entry[name] && typeof entry[name] === 'object') {
+      Object.assign(together, entry[name])
+    }
+  })
+  Object.assign(together, source[name])
+  // eslint-disable-next-line no-param-reassign
+  component[name] = together
+}
