@@ -4,6 +4,7 @@ import React from 'react'
 import { fillOptions, invokeFrom } from './helpers'
 import type { Options } from './types'
 
+const BLACKLISTED_KEYS = new Set(['length', 'prototype', 'contextTypes', 'prototype', 'arguments', 'caller'])
 export function process(options: Options, source: Function, givenMixins: Array<any>): Function {
   const mixins = givenMixins.filter(i => i)
   const methodMixins = mixins.filter(i => typeof i === 'object')
@@ -11,13 +12,9 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   // NOTE: This adds the builtin methods, AFTER mixing methods
   methodMixins.push(source.prototype)
 
-  // $FlowIgnore: Gotta extend a Function-typed class, sorry
-  class ChildComponent extends source {
-    static get name() {
-      return super.name
-    }
+  class ChildComponent {
     get name() {
-      return super.name
+      return source.name
     }
     componentDidMount(...args) {
       invokeFrom(methodMixins, 'componentDidMount', this, args)
@@ -52,6 +49,16 @@ export function process(options: Options, source: Function, givenMixins: Array<a
       return result
     }
   }
+  Object.getOwnPropertyNames(source).forEach(function(key) {
+    if (BLACKLISTED_KEYS.has(key)) return
+    Object.defineProperty(ChildComponent, key, {
+      enumerable: {}.propertyIsEnumerable.call(source, key),
+      get() { console.log('accessed', key); return source[key] },
+      // eslint-disable-next-line no-param-reassign
+      set(value) { source[key] = value },
+    })
+  })
+  Object.setPrototypeOf(ChildComponent.prototype, source.prototype)
 
   // NOTE: Make sure that mixins can be overwritten by the class contextTypes
   const contextTypes = {}
@@ -60,7 +67,8 @@ export function process(options: Options, source: Function, givenMixins: Array<a
       Object.assign(contextTypes, entry.contextTypes)
     }
   })
-  Object.assign(contextTypes, ChildComponent.contextTypes)
+  Object.assign(contextTypes, source.contextTypes)
+  // $FlowIgnore: React class prop
   ChildComponent.contextTypes = contextTypes
 
   if (options.react) {
@@ -74,7 +82,7 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   }, ChildComponent)
 }
 
-export default function mixin(givenOptions: Object, sourceOrMixins: Function | Array<any>, mixins: Array<any> = []): any {
+export default function mixin(givenOptions: Object, sourceOrMixins: Function | Array<any> = [], mixins: Array<any> = []): any {
   const options = fillOptions(givenOptions)
 
   if (options.decorator) {
