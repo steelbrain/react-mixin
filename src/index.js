@@ -53,7 +53,7 @@ export function process(options: Options, source: Function, givenMixins: Array<a
     if (BLACKLISTED_KEYS.has(key)) return
     Object.defineProperty(ChildComponent, key, {
       enumerable: {}.propertyIsEnumerable.call(source, key),
-      get() { console.log('accessed', key); return source[key] },
+      get() { return source[key] },
       // eslint-disable-next-line no-param-reassign
       set(value) { source[key] = value },
     })
@@ -75,8 +75,7 @@ export function process(options: Options, source: Function, givenMixins: Array<a
     Object.setPrototypeOf(source.prototype, React.Component.prototype)
   }
 
-  const decoratorMixins = mixins.filter(i => typeof i === 'function')
-  return decoratorMixins.reduce((prev, entry) => {
+  return mixins.filter(i => typeof i === 'function').reduce((prev, entry) => {
     const value = entry(prev)
     return value || prev
   }, ChildComponent)

@@ -126,5 +126,37 @@ describe('react-mixin', function() {
 
       expect(MyComponent.myFunc).toBe(myFunction)
     })
+    it('calls all the decorator mixins in order', function() {
+      const value1 = function() {}
+      const value2 = function() {}
+      const value3 = function() {}
+      const value4 = function() {}
+
+      const called = []
+      const decor = mixin({ decorator: true }, [
+        function(input) {
+          expect(input.prototype instanceof value1).toBe(true)
+          called.push('func1')
+          return value2
+        },
+        function(input) {
+          expect(input).toBe(value2)
+          called.push('func2')
+          return value3
+        },
+        function(input) {
+          expect(input).toBe(value3)
+          called.push('func3')
+          return value4
+        },
+        function(input) {
+          expect(input).toBe(value4)
+          called.push('func4')
+        },
+      ])
+
+      expect(decor(value1)).toBe(value4)
+      expect(called).toEqual(['func1', 'func2', 'func3', 'func4'])
+    })
   })
 })
