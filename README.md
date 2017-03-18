@@ -1,5 +1,7 @@
 # React Mixin
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/steelbrain/react-mixin.svg)](https://greenkeeper.io/)
+
 `sb-react-mixin` is a Helper libray for containing reusable component decorators and interfaces.
 
 ## API
