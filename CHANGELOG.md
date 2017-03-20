@@ -1,3 +1,7 @@
+## 0.0.3
+
+- Call parent constructor properly
+
 ## 0.0.2
 
 - Only add react lifecycle methods if `options.react` is true
