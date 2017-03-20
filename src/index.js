@@ -12,55 +12,54 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   // NOTE: This adds the builtin methods, AFTER mixing methods
   methodMixins.push(source.prototype)
 
-  class ChildComponent {
-    get name() {
-      return source.name
+  let ChildComponent
+  if (options.react) {
+    ChildComponent = class {
+      componentDidMount(...args) {
+        invokeFrom(methodMixins, 'componentDidMount', this, args)
+      }
+      componentWillMount(...args) {
+        invokeFrom(methodMixins, 'componentWillMount', this, args)
+      }
+      componentWillReceiveProps(...args) {
+        invokeFrom(methodMixins, 'componentWillReceiveProps', this, args)
+      }
+      componentWillUpdate(...args) {
+        invokeFrom(methodMixins, 'componentWillUpdate', this, args)
+      }
+      componentDidUpdate(...args) {
+        invokeFrom(methodMixins, 'componentDidUpdate', this, args)
+      }
+      componentWillUnmount(...args) {
+        invokeFrom(methodMixins, 'componentWillUnmount', this, args)
+      }
+      shouldUpdateComponent(...args) {
+        return invokeFrom(methodMixins, 'shouldUpdateComponent', this, args).every(i => i)
+      }
+      getChildContext() {
+        const result = {}
+        invokeFrom(methodMixins, 'getChildContext', this, []).forEach(function(entry) {
+          Object.assign(result, entry)
+        })
+        return result
+      }
     }
-    componentDidMount(...args) {
-      invokeFrom(methodMixins, 'componentDidMount', this, args)
-    }
-    componentWillMount(...args) {
-      invokeFrom(methodMixins, 'componentWillMount', this, args)
-    }
-    componentWillReceiveProps(...args) {
-      invokeFrom(methodMixins, 'componentWillReceiveProps', this, args)
-    }
-    componentWillUpdate(...args) {
-      invokeFrom(methodMixins, 'componentWillUpdate', this, args)
-    }
-    componentDidUpdate(...args) {
-      invokeFrom(methodMixins, 'componentDidUpdate', this, args)
-    }
-    componentWillUnmount(...args) {
-      invokeFrom(methodMixins, 'componentWillUnmount', this, args)
-    }
-    shouldUpdateComponent(...args) {
-      return invokeFrom(methodMixins, 'shouldUpdateComponent', this, args).every(i => i)
-    }
-    getChildContext() {
-      const result = {}
-      invokeFrom(methodMixins, 'getChildContext', this, []).forEach(function(entry) {
-        Object.assign(result, entry)
-      })
-      return result
-    }
+  } else {
+    ChildComponent = class {}
   }
+  // $FlowIgnore: It's a custom prop bro
+  ChildComponent.__sb_react_mixin_source = source // eslint-disable-line no-underscore-dangle
+
   Object.getOwnPropertyNames(source).forEach(function(key) {
     if (BLACKLISTED_KEYS.has(key)) return
-    Object.defineProperty(ChildComponent, key, {
-      enumerable: {}.propertyIsEnumerable.call(source, key),
-      get() { return source[key] },
-      // eslint-disable-next-line no-param-reassign
-      set(value) { source[key] = value },
-    })
+    Object.defineProperty(ChildComponent, key, Object.getOwnPropertyDescriptor(source, key))
   })
   Object.setPrototypeOf(ChildComponent.prototype, source.prototype)
 
-  mergeIntoComponent('contextTypes', ChildComponent, source, mixins)
-  mergeIntoComponent('childContextTypes', ChildComponent, source, mixins)
-  mergeIntoComponent('defaultProps', ChildComponent, source, mixins)
-
   if (options.react) {
+    mergeIntoComponent('contextTypes', ChildComponent, source, mixins)
+    mergeIntoComponent('childContextTypes', ChildComponent, source, mixins)
+    mergeIntoComponent('defaultProps', ChildComponent, source, mixins)
     Object.setPrototypeOf(source.prototype, React.Component.prototype)
   }
 
