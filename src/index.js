@@ -52,12 +52,7 @@ export function process(options: Options, source: Function, givenMixins: Array<a
 
   Object.getOwnPropertyNames(source).forEach(function(key) {
     if (BLACKLISTED_KEYS.has(key)) return
-    Object.defineProperty(ChildComponent, key, {
-      enumerable: {}.propertyIsEnumerable.call(source, key),
-      get() { return source[key] },
-      // eslint-disable-next-line no-param-reassign
-      set(value) { source[key] = value },
-    })
+    Object.defineProperty(ChildComponent, key, Object.getOwnPropertyDescriptor(source, key))
   })
   Object.setPrototypeOf(ChildComponent.prototype, source.prototype)
 
