@@ -16,6 +16,8 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   if (options.react) {
     ChildComponent = class {
       constructor(...args) {
+        // $FlowIgnore
+        React.Component.call(this, ...args)
         source.call(this, ...args)
       }
       componentDidMount(...args) {

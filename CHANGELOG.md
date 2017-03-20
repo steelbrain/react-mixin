@@ -1,3 +1,7 @@
+## 0.0.4
+
+- Follow up to last release
+
 ## 0.0.3
 
 - Call parent constructor properly
