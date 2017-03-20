@@ -15,6 +15,9 @@ export function process(options: Options, source: Function, givenMixins: Array<a
   let ChildComponent
   if (options.react) {
     ChildComponent = class {
+      constructor(...args) {
+        source.call(this, ...args)
+      }
       componentDidMount(...args) {
         invokeFrom(methodMixins, 'componentDidMount', this, args)
       }
@@ -45,7 +48,11 @@ export function process(options: Options, source: Function, givenMixins: Array<a
       }
     }
   } else {
-    ChildComponent = class {}
+    ChildComponent = class {
+      constructor(...args) {
+        source.call(this, ...args)
+      }
+    }
   }
   // $FlowIgnore: It's a custom prop bro
   ChildComponent.__sb_react_mixin_source = source // eslint-disable-line no-underscore-dangle
