@@ -202,7 +202,7 @@ describe('react-mixin', function() {
 
       @decor
       // $FlowIgnore: IT IS A REACT COMPONENT!!!
-      class MyClass { // eslint-disable-line no-unused-vars
+      class MyClass {
         componentDidMount() {
           validateMyThis(this)
           called.push('componentDidMount')
