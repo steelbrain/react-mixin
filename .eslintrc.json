@@ -1,6 +1,5 @@
 {
   "extends": "steelbrain",
-  "plugins": ["react"],
   "rules": {
     "import/prefer-default-export": "off"
   }
